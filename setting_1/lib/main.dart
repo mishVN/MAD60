@@ -1,73 +1,169 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Pet Care Settings',
       debugShowCheckedModeBanner: false,
-      title: 'Settings Page',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
+        brightness: Brightness.light,
       ),
-      home: SettingsPage(),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primarySwatch: Colors.teal,
+      ),
+      themeMode: ThemeMode.system,
+      home: const SettingsPage(),
     );
   }
 }
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool isDarkMode = false;
+  String selectedLanguage = 'English';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Profile Settings'),
-            onTap: () {
-              // Profile settings action
+          // Dark Mode Toggle
+          SwitchListTile(
+            title: const Text('Dark Mode'),
+            value: isDarkMode,
+            onChanged: (val) {
+              setState(() {
+                isDarkMode = val;
+                // Optional: Apply ThemeMode logic here
+              });
             },
+            secondary: const Icon(Icons.dark_mode),
           ),
-          Divider(),
+
+          // Language Dropdown
           ListTile(
-            leading: Icon(Icons.language),
-            title: Text('Languages'),
-            onTap: () {
-              // Languages action
-            },
-          ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.dark_mode),
-            title: Text('Dark Mode'),
-            trailing: Switch(
-              value: false, // You can implement dark mode logic
-              onChanged: (value) {},
+            leading: const Icon(Icons.language),
+            title: const Text('Language'),
+            trailing: DropdownButton<String>(
+              value: selectedLanguage,
+              items:
+                  ['English', 'Spanish', 'French']
+                      .map(
+                        (lang) =>
+                            DropdownMenuItem(value: lang, child: Text(lang)),
+                      )
+                      .toList(),
+              onChanged: (val) {
+                if (val != null) {
+                  setState(() => selectedLanguage = val);
+                }
+              },
             ),
           ),
-          Divider(),
+
+          const Divider(),
+
+          // About Us
           ListTile(
-            leading: Icon(Icons.help),
-            title: Text('Help & Support'),
+            leading: const Icon(Icons.info_outline),
+            title: const Text('About Us'),
             onTap: () {
-              // Help & Support action
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AboutUsPage()),
+              );
             },
           ),
-          Divider(),
+
+          // Contact Us
           ListTile(
-            leading: Icon(Icons.pets),
-            title: Text('Pet Information Management'),
+            leading: const Icon(Icons.email),
+            title: const Text('Contact Us'),
             onTap: () {
-              // Pet Info action
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ContactUsPage()),
+              );
             },
+          ),
+
+          const Divider(),
+
+          // App Version
+          ListTile(
+            leading: const Icon(Icons.verified),
+            title: const Text('App Version'),
+            trailing: const Text('1.0.0'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// About Us Page
+class AboutUsPage extends StatelessWidget {
+  const AboutUsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('About Us')),
+      body: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          'PetCare+ helps you manage your pet’s health, grooming, diet, and vet appointments. '
+          'Our mission is to provide smart and compassionate care tools for every pet parent.',
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+
+// Contact Us Page
+class ContactUsPage extends StatelessWidget {
+  const ContactUsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Contact Us')),
+      body: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Email: support@petcareplus.com',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 8),
+            Text('Phone: +44 20 1234 5678', style: TextStyle(fontSize: 16)),
+            SizedBox(height: 8),
+            Text(
+              'Address: 10 Pet Lane, Cambridge, CB1 2AB',
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
       ),
     );
   }
