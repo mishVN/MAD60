@@ -1,0 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class BoardingService {
+  final CollectionReference feedbackCollection = FirebaseFirestore.instance.collection('boarding_feedback');
+
+  // Add Feedback to Firestore
+  Future<void> addFeedback(Feedback feedback) async {
+    await feedbackCollection.add(feedback.toMap());
+  }
+
+  // Get Feedback from Firestore
+  Stream<List<Feedback>> getFeedbacks() {
+    return feedbackCollection.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => Feedback.fromMap(doc.data() as Map<String, dynamic>)).toList();
+    });
+  }
+}
