@@ -1,26 +1,48 @@
 import 'package:flutter/material.dart';
 
+/// Global theme manager using ValueNotifier
+class ThemeNotifier extends ValueNotifier<ThemeMode> {
+  ThemeNotifier() : super(ThemeMode.light); // Default to light mode
+
+  void toggleTheme(bool isDarkMode) {
+    value = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+  }
+}
+
+// Global instance
+final ThemeNotifier themeNotifier = ThemeNotifier();
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, currentTheme, _) {
+        return MyApp(themeMode: currentTheme);
+      },
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ThemeMode themeMode;
+
+  const MyApp({super.key, required this.themeMode});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Pet Care Settings',
       debugShowCheckedModeBanner: false,
+      themeMode: themeMode,
       theme: ThemeData(
-        primarySwatch: Colors.teal,
         brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.white,
+        primarySwatch: Colors.teal,
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.teal,
       ),
-      themeMode: ThemeMode.system,
       home: const SettingsPage(),
     );
   }
@@ -51,7 +73,7 @@ class _SettingsPageState extends State<SettingsPage> {
             onChanged: (val) {
               setState(() {
                 isDarkMode = val;
-                // Optional: Apply ThemeMode logic here
+                themeNotifier.toggleTheme(isDarkMode);
               });
             },
             secondary: const Icon(Icons.dark_mode),
@@ -118,7 +140,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-// About Us Page
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
@@ -138,7 +159,6 @@ class AboutUsPage extends StatelessWidget {
   }
 }
 
-// Contact Us Page
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});
 
