@@ -1,7 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
+}
+
+void _registerUser() async {
+  final url = Uri.parse("http://localhost:5000/register");
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: json.encode({
+      "username": _usernameController.text,
+      "email": _emailController.text,
+      "password": _passwordController.text,
+      "confirmPassword": _confirmPasswordController.text,
+      "userType": _selectedUserType,
+    }),
+  );
+
+  if (response.statusCode == 201) {
+    print("Registration successful");
+  } else {
+    print("Error: ${response.body}");
+  }
 }
 
 class MyApp extends StatelessWidget {
