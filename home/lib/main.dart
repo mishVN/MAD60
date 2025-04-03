@@ -101,6 +101,13 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print("Chat with Support");
+        },
+        backgroundColor: Colors.teal,
+        child: Icon(Icons.chat, color: Colors.white),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.teal,
