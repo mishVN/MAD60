@@ -1,189 +1,61 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:pet_plus_new/const.dart';
+import 'package:pet_plus_new/provider/appoinment_provider.dart';
+import 'package:pet_plus_new/provider/cart_provider.dart';
+import 'package:pet_plus_new/provider/doctor_provider.dart';
+import 'package:pet_plus_new/provider/hospital_provider.dart';
+import 'package:pet_plus_new/provider/patient_provider.dart';
+import 'package:pet_plus_new/provider/user_provider.dart';
+import 'package:pet_plus_new/screens/authentication/login.dart';
+import 'package:pet_plus_new/screens/homescreen.dart';
+import 'package:provider/provider.dart';
+import 'firebase_options.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  await _setup();
+  runApp(const MyApp());
+}
+
+Future<void> _setup() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  Stripe.publishableKey = publishableKey;
 }
 
 class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        textTheme: GoogleFonts.poppinsTextTheme(),
-        primaryColor: Colors.teal,
-      ),
-      home: HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final PageController _controller = PageController();
-  final List<String> bannerTexts = [
-    "Pet Care",
-    "Quality Services",
-    "Happy Pets"
-  ];
-  int _currentIndex = 0;
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.teal,
-        title: Text(
-          'Pet Care',
-          style: GoogleFonts.poppins(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => CartProvider()),
+        ChangeNotifierProvider(create: (context) => AppoinmentProvider()),
+        ChangeNotifierProvider(create: (context) => PatientProvider()),
+        ChangeNotifierProvider(create: (context) => HospitalProvider()),
+        ChangeNotifierProvider(create: (context) => DoctorProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Pet Plus',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Color.fromARGB(255, 20, 32, 166),
           ),
+          useMaterial3: true,
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.account_circle, size: 30, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          /// Carousel Slider for Banners
-          CarouselSlider(
-            options: CarouselOptions(
-              height: 180,
-              autoPlay: true,
-              enlargeCenterPage: true,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-            ),
-            items: bannerTexts.map((text) {
-              return BannerPage(text);
-            }).toList(),
-          ),
-
-          /// Services Section
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Text(
-              'Our Services',
-              style: GoogleFonts.poppins(
-                  fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          Expanded(
-            child: GridView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.3,
-              ),
-              itemCount: services.length,
-              itemBuilder: (context, index) {
-                return ServiceButton(services[index]);
-              },
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print("Chat with Support");
-        },
-        backgroundColor: Colors.teal,
-        child: Icon(Icons.chat, color: Colors.white),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.notifications), label: "Alerts"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.settings), label: "Settings"),
-        ],
-      ),
-    );
-  }
-}
-
-/// Services List
-final List<String> services = [
-  'Vet',
-  'Grooming',
-  'Boarding',
-  'Training',
-  'Pet Foods',
-  'Checkups',
-];
-
-class BannerPage extends StatelessWidget {
-  final String text;
-  BannerPage(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        color: Colors.teal,
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: GoogleFonts.poppins(
-            fontSize: 26,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+        home: StreamBuilder(
+          stream: FirebaseAuth.instance.authStateChanges(),
+          builder: (ctx, snapshot) {
+            if (snapshot.hasData) {
+              return const Homescreen();
+            }
+            return LoginScreen(); // LoginScreen();
+          },
         ),
-      ),
-    );
-  }
-}
-
-class ServiceButton extends StatelessWidget {
-  final String service;
-  ServiceButton(this.service);
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        print('$service clicked');
-      },
-      style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 30),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        backgroundColor: Colors.teal.shade400,
-        foregroundColor: Colors.white,
-      ),
-      child: Text(
-        service,
-        textAlign: TextAlign.center,
-        style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
